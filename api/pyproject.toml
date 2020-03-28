@@ -1,0 +1,18 @@
+[tool.poetry]
+name = 'CoVid-Killer'
+version = '0.0.1'
+description = 'The only app to kill the virus'
+authors = ['Bieroński Michał', 'Haczek Artur', 'Janczarek Paweł', 'Siwik Anna']
+
+readme = 'README.md'
+
+[tool.poetry.dependencies]
+python = '3.8.2'
+
+Django = '3.0.4'
+djangorestframework = '3.11.0'
+psycopg2 = '*'
+
+[build-system]
+requires = ['poetry>=1.0']
+build-backend = 'poetry.masonry.api'
