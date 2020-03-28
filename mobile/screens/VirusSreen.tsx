@@ -1,16 +1,19 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet, Animated } from 'react-native';
 import { Virus } from '../models/Virus';
+import { Bar } from 'react-native-progress';
+
 
 export class VirusScreen<P> extends React.Component<P> {
-  virus = new Virus(360);
+  VIRUS_HEALTH = 360;
+
+  virus = new Virus(this.VIRUS_HEALTH);
+  previousVirusHealth = this.VIRUS_HEALTH;
+
   virusSpringValue = new Animated.Value(1);
 
-  virusIntialHealth = this.virus.getHealth();
-  previousVirusHealth = this.virusIntialHealth;
-
   state = {
-    virusHealth: this.virusIntialHealth
+    virusHealth: this.VIRUS_HEALTH
   };
 
   constructor(props: P) {
@@ -30,33 +33,42 @@ export class VirusScreen<P> extends React.Component<P> {
     this.setState({ virusHealth: this.virus.getHealth() });
 
     if (this.virus.getHealth() % 5 == 0) {
-      this.virusSpringValue.setValue(
-        this.previousVirusHealth / this.virusIntialHealth
-      );
-
-      Animated.spring(this.virusSpringValue, {
-        toValue: this.virus.getHealth() / this.virusIntialHealth,
-        friction: 1
-      }).start();
-
-      this.previousVirusHealth = this.virus.getHealth();
+      this.animateVirus();
     }
   }
 
+  animateVirus() {
+    this.virusSpringValue.setValue(
+      this.previousVirusHealth / this.virus.getInitialHealth()
+    );
+
+    Animated.spring(this.virusSpringValue, {
+      toValue: this.virus.getHealthPercentage(),
+      friction: 0.25
+    }).start();
+
+    this.previousVirusHealth = this.virus.getHealth();
+  }
+
   render() {
-    debugger;
     return (
       <>
         <View style={styles.container}>
-          {this.state.virusHealth > 0 ? (
+          {this.virus.getHealth() > 0 ? (
             <>
               <Text style={styles.virusHpText}>
                 HP: {this.state.virusHealth}
               </Text>
+              <Bar
+                progress={this.virus.getHealthPercentage()}
+                width={200}
+                color='red'
+                style={styles.virusHpProgress}
+              />
               <Animated.Image
                 style={{
-                  height: this.virusIntialHealth,
-                  width: this.virusIntialHealth,
+                  height: this.VIRUS_HEALTH,
+                  width: this.VIRUS_HEALTH,
                   transform: [{ scale: this.virusSpringValue }]
                 }}
                 source={require('../resources/images/corona.webp')}
@@ -82,9 +94,12 @@ const styles = StyleSheet.create({
     backgroundColor: 'black'
   },
   virusHpText: {
-    fontSize: 30,
+    fontSize: 15,
+    color: 'red'
+  },
+  virusHpProgress: {
     marginBottom: 10,
-    color: 'green'
+    marginTop: 5
   },
   trophyImage: {
     width: 200,
