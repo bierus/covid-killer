@@ -1,7 +1,6 @@
 export class Virus {
-  constructor(private imageUrl: string, private health: number) {}
+  constructor(private health: number) {}
 
-  getImageUrl = () => this.imageUrl;
   getHealth = () => this.health;
 
   reduceHealth(reduceAmount: number) {
