@@ -11,56 +11,40 @@ const LOCATION_TASK_NAME = 'background-virus-task';
 
 export class VirusScreen<P> extends React.Component<P> {
   VIRUS_HEALTH = 360;
-  virus = new Virus(this.VIRUS_HEALTH);
+  virus = new Virus(this.VIRUS_HEALTH, this.VIRUS_HEALTH);
   previousVirusHealth = this.VIRUS_HEALTH;
   virusSpringValue = new Animated.Value(1);
   virusIntervalId: number;
 
   state = {
-    dist: 9999999,
+    dist: 999,
     virusHealth: this.VIRUS_HEALTH
   };
 
   constructor(props: P) {
     super(props);
-    getData("Virus").then( (value) => {
-      console.log(value)
-      console.log("totototot")
-      this.virus = new Virus(value.initialHealth);//value;
-      this.virus.setHealth( value.health );
-      if(this.virus === undefined){
-        this.virus = new Virus(this.VIRUS_HEALTH);
-        storeData("Virus", this.virus);
-      } 
-  
-      console.log(this.virus);
-  
-      this.virusIntervalId = setInterval(
-        () => {
-          this.virus.getHealth() > 0
-          ? this.reduceVirusHealth()
-          : clearInterval(this.virusIntervalId)
-          storeData("Virus", this.virus);
-        },
-        1000
-      );
-    });
+    this.init()
   }
 
-  init = async () => {
-    this.virus = getData("Virus").then( (res, rej) => {
-      if(this.virus === undefined){
-        this.virus = new Virus(this.VIRUS_HEALTH);
-        storeData("Virus", undefined);
+  init = () => {
+    getData("Virus").then( (value) => { 
+      if(value === undefined){
+        this.virus = new Virus(this.VIRUS_HEALTH, this.VIRUS_HEALTH);
+        storeData("Virus", this.virus);
       } 
-  
-      console.log(this.virus);
+      else{
+        this.virus = new Virus(value.initialHealth, value.health);
+      }
   
       this.virusIntervalId = setInterval(
         () => {
-          this.virus.getHealth() > 0
-          ? this.reduceVirusHealth()
-          : clearInterval(this.virusIntervalId)
+          if(this.virus.getHealth() > 0){
+            this.reduceVirusHealth();
+            storeData("Virus", this.virus);
+          }
+          else{
+            clearInterval(this.virusIntervalId);
+          }
         },
         1000
       );
@@ -161,6 +145,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'black'
   },
   virusHpText: {
+    padding: 10,
     fontSize: 15,
     color: 'red'
   },
