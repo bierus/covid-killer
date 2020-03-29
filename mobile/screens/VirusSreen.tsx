@@ -117,7 +117,7 @@ export class VirusScreen<P> extends React.Component<P> {
               <Bar
                 progress={this.virus.getHealthPercentage()}
                 width={200}
-                color='red'
+                color='#A92C2C'
                 style={styles.virusHpProgress}
               />
               <Animated.Image
@@ -126,7 +126,7 @@ export class VirusScreen<P> extends React.Component<P> {
                   width: this.VIRUS_HEALTH,
                   transform: [{ scale: this.virusSpringValue }]
                 }}
-                source={require('../resources/images/corona.png')}
+                source={require('../resources/images/coronavirus.png')}
               />
             </>
           ) : (
@@ -151,12 +151,12 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'black'
+    backgroundColor: '#D8E2BB'
   },
   virusHpText: {
     padding: 10,
     fontSize: 15,
-    color: 'red'
+    color: 'black'
   },
   virusHpProgress: {
     marginBottom: 10,
