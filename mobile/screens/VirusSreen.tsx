@@ -1,34 +1,84 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet, Animated } from 'react-native';
+import { View, Text, Image, StyleSheet, Animated, Button } from 'react-native';
 import { Virus } from '../models/Virus';
 import Bar from 'react-native-progress/Bar';
 
+import { storeData, getData } from '../shared/asyncStorage';
+import { getLocationAsync, distance } from '../shared/location';
+
+import * as TaskManager from 'expo-task-manager';
+const LOCATION_TASK_NAME = 'background-virus-task';
 
 export class VirusScreen<P> extends React.Component<P> {
   VIRUS_HEALTH = 360;
-
-  virus = new Virus(this.VIRUS_HEALTH);
+  virus = new Virus(this.VIRUS_HEALTH, this.VIRUS_HEALTH);
   previousVirusHealth = this.VIRUS_HEALTH;
-
   virusSpringValue = new Animated.Value(1);
+  virusIntervalId: number;
 
   state = {
+    dist: 999,
     virusHealth: this.VIRUS_HEALTH
   };
 
   constructor(props: P) {
     super(props);
+    this.init()
+  }
 
-    const virusIntervalId = setInterval(
-      () =>
-        this.virus.getHealth() > 0
-          ? this.reduceVirusHealth()
-          : clearInterval(virusIntervalId),
-      1000
+  restart = () => {
+    this.virus = new Virus(this.VIRUS_HEALTH, this.VIRUS_HEALTH);
+    storeData('Virus', this.virus);
+    this.init();
+  }
+
+  init = () => {
+    getData('Virus').then((value) => {
+      if (value === undefined) {
+        this.virus = new Virus(this.VIRUS_HEALTH, this.VIRUS_HEALTH);
+        storeData('Virus', this.virus);
+      }
+      else {
+        this.virus = new Virus(value.initialHealth, value.health);
+      }
+
+      this.virusIntervalId = setInterval(
+        () => {
+          if (this.virus.getHealth() > 0) {
+            this.reduceVirusHealth();
+            storeData('Virus', this.virus);
+          }
+          else {
+            clearInterval(this.virusIntervalId);
+          }
+        },
+        1000
+      );
+    });
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.virusIntervalId);
+  }
+
+  calculateDist = async () => {
+    let location = await getLocationAsync();
+    let homeLocation = await getData('homeLocation')
+    return distance(
+      location.coords.latitude,
+      location.coords.longitude,
+      homeLocation.coords.latitude,
+      homeLocation.coords.longitude,
+      'M'
     );
   }
 
-  reduceVirusHealth() {
+  reduceVirusHealth = async () => {
+    let currentDist = await this.calculateDist()
+    this.setState({ dist: currentDist })
+    if (currentDist > 10) {
+      return;
+    }
     this.virus.reduceHealth(1);
     this.setState({ virusHealth: this.virus.getHealth() });
 
@@ -42,10 +92,11 @@ export class VirusScreen<P> extends React.Component<P> {
       this.previousVirusHealth / this.virus.getInitialHealth()
     );
 
-    Animated.spring(this.virusSpringValue, {
-      toValue: this.virus.getHealthPercentage(),
-      friction: 0.25
-    }).start();
+    Animated.spring(this.virusSpringValue,
+      {
+        toValue: this.virus.getHealthPercentage(),
+        friction: 0.25
+      }).start();
 
     this.previousVirusHealth = this.virus.getHealth();
   }
@@ -54,6 +105,10 @@ export class VirusScreen<P> extends React.Component<P> {
     return (
       <>
         <View style={styles.container}>
+          <Text style={styles.virusHpText}>
+            Dist: {this.state.dist} M
+          </Text>
+
           {this.virus.getHealth() > 0 ? (
             <>
               <Text style={styles.virusHpText}>
@@ -70,16 +125,21 @@ export class VirusScreen<P> extends React.Component<P> {
                   height: this.VIRUS_HEALTH,
                   width: this.VIRUS_HEALTH,
                   transform: [{ scale: this.virusSpringValue }]
-                }}                
+                }}
                 source={require('../resources/images/corona.png')}
               />
             </>
           ) : (
-            <Image
-              source={require('../resources/images/trophy.png')}
-              style={styles.trophyImage}
-            />
-          )}
+              <Image
+                source={require('../resources/images/trophy.png')}
+                style={styles.trophyImage}
+              />
+            )}
+          {/* TO BE REMOVED */}
+          <Button
+            title='Restart'
+            onPress={this.restart}
+          />
         </View>
       </>
     );
@@ -94,6 +154,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'black'
   },
   virusHpText: {
+    padding: 10,
     fontSize: 15,
     color: 'red'
   },
