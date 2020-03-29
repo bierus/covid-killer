@@ -1,24 +1,18 @@
 import React from 'react';
 import { NavigationInjectedProps } from 'react-navigation';
 import { Button, View, Text, StyleSheet } from 'react-native';
-import * as Location from 'expo-location';
-import * as Permissions from 'expo-permissions';
-import { LocationData } from 'expo-location';
-
 import {storeData, getData} from '../shared/asyncStorage.ts'
-
-type State = {
-  location: LocationData;
-  errorMessage: string;
-};
+import { getLocationAsync } from '../shared/location.ts'
 
 export class HomeScreen extends React.Component<
-  NavigationInjectedProps,
-  State
+  NavigationInjectedProps
 > {
   constructor(props: NavigationInjectedProps) {
     super(props);
-    this.getLocationAsync();
+  }
+
+  componentDidMount(){
+    this.init();
   }
 
   state = {
@@ -36,20 +30,27 @@ export class HomeScreen extends React.Component<
     errorMessage: null
   };
 
-  getLocationAsync = async () => {
-    let { status } = await Permissions.askAsync(Permissions.LOCATION);
-    if (status !== 'granted') {
-      this.setState({
-        errorMessage: 'Permission to access location was denied'
-      });
+  init = async () => {
+    // if info === undefined, load homeView... This process should be done before component Init
+    let info = await getData("homeLocation");
+    await this.setLocation()
+    if(info){
+        this.props.navigation.navigate('Virus')
+    } 
+  }
+
+  setLocation = async () => {
+    let location = await getLocationAsync();
+    if(!location.error){
+      this.setState({ location: location});
     }
-    let currentLocation = await Location.getCurrentPositionAsync({});
-    this.setState({ location: currentLocation});
-  };
+    else{
+      this.setState({ errorMessage: location.error});
+    }
+  }
 
   navigateToVirus = () => {
     storeData("homeLocation", JSON.stringify(this.state.location));
-    console.log("STORED")
     this.props.navigation.navigate('Virus')
   } 
 
@@ -76,7 +77,7 @@ export class HomeScreen extends React.Component<
               />
               <Button
                 title='Try again'
-                onPress={() => this.getLocationAsync()}
+                onPress={() => this.setLocation()}
               />
             </View>
           </>
