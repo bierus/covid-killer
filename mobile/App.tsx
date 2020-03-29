@@ -10,8 +10,20 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator>
-        <Stack.Screen name='Home' component={HomeScreen} />
-        <Stack.Screen name='Virus' component={VirusScreen} />
+        <Stack.Screen 
+          name='Home' 
+          component={HomeScreen} 
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen 
+          name='Virus' 
+          component={VirusScreen} 
+          options={{
+            headerShown: false,
+          }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

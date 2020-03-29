@@ -35,13 +35,16 @@ export class HomeScreen extends React.Component<
   };
 
   getLocationAsync = async () => {
+    console.log("GET LOCATION")
     let { status } = await Permissions.askAsync(Permissions.LOCATION);
     if (status !== 'granted') {
       this.setState({
         errorMessage: 'Permission to access location was denied'
       });
     }
-    this.setState({ location: await Location.getCurrentPositionAsync({}) });
+    let currentLocation = await Location.getCurrentPositionAsync({});
+    console.log(currentLocation)
+    this.setState({ location: currentLocation});
   };
 
   render() {
@@ -54,16 +57,22 @@ export class HomeScreen extends React.Component<
         ) : (
           <>
             <View style={styles.container}>
-              <Text>Is this your home location?</Text>
-              <Text>
+
+              <Text style={styles.gameTitle}>Covid Killer</Text>
+              <Text style={styles.prompt}>Is this your home location?</Text>
+              <Text style={styles.promptCords}>
                 Latitude: {latitude}
                 {'\n'}Longitude: {longitude}
               </Text>
+              <Button
+                title='Save'
+                onPress={() => this.props.navigation.navigate('Virus')}
+              />
+              <Button
+                title='Try again'
+                onPress={() => this.getLocationAsync()}
+              />
             </View>
-            <Button
-              title='Go to virus page'
-              onPress={() => this.props.navigation.navigate('Virus')}
-            />
           </>
         )}
       </>
@@ -77,5 +86,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#fff'
-  }
+  },
+  gameTitle:{
+    color: '#555',
+    fontSize: 50,
+    padding: 20
+  },
+  prompt:{
+    
+    color: '#555',
+    fontSize: 15,
+    padding: 8
+  },
+  promptCords:{
+    
+    color: '#555',
+    fontSize: 15,
+    paddingTop: 8,
+    paddingBottom: 20
+  },
+
 });
