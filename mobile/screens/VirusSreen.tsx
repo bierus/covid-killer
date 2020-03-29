@@ -14,52 +14,49 @@ export class VirusScreen<P> extends React.Component<P> {
 
   virusSpringValue = new Animated.Value(1);
 
+  virusIntervalId;
+
   state = {
+    dist: 9999999,
     virusHealth: this.VIRUS_HEALTH
   };
 
   constructor(props: P) {
     super(props);
 
-    const virusIntervalId = setInterval(
+    this.virusIntervalId = setInterval(
       () =>
         this.virus.getHealth() > 0
           ? this.reduceVirusHealth()
-          : clearInterval(virusIntervalId),
+          : clearInterval(this.virusIntervalId),
       1000
     );
   }
 
-  reduceVirusHealth = async() => {
-    // let location = await getLocationAsync();
-    let mocklocation = {
-      "coords": {
-        "accuracy": 5,
-        "altitude": 0,
-        "altitudeAccuracy": -1,
-        "heading": -1,
-        "latitude": 40.7128, // New York
-        "longitude": -74.00600,
-        "speed": -1
-      },
-     "timestamp": 666
-    };
+  componentWillUnmount() {
+    clearInterval(this.virusIntervalId);
+  }
+
+  calculateDist = async () => {
+    let location = await getLocationAsync(); 
     let homeLocationString = await getData("homeLocation");
     let homeLocation = JSON.parse(homeLocationString);
-    console.log(distance(
-      mocklocation.coords.latitude,
-      mocklocation.coords.longitude,
+    return distance(
+      location.coords.latitude,
+      location.coords.longitude,
       homeLocation.coords.latitude,
       homeLocation.coords.longitude,
-      "K") + " KM"
+      "M"
     );
+  }
+
+  reduceVirusHealth = async () => {
+    let currentDist = await this.calculateDist()
+
     this.virus.reduceHealth(1);
-    this.setState({ virusHealth: this.virus.getHealth() });
+    this.setState({ dist: currentDist ,virusHealth: this.virus.getHealth() });
 
     if (this.virus.getHealth() % 5 == 0) {
-
-      console.log(homeLocation);
-      console.log(mocklocation);
       this.animateVirus();
     }
   }
@@ -82,6 +79,11 @@ export class VirusScreen<P> extends React.Component<P> {
     return (
       <>
         <View style={styles.container}>
+
+          <Text style={styles.virusHpText}>
+            Dist: {this.state.dist} M
+          </Text>
+
           {this.virus.getHealth() > 0 ? (
             <>
               <Text style={styles.virusHpText}>
