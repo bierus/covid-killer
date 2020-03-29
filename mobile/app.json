@@ -14,12 +14,18 @@
       "web"
     ],
     "ios": {
+      "bundleIdentifier": "com.coronaprod.coronakiller",
+      "buildNumber": "1.0.0",
       "infoPlist": {
         "UIBackgroundModes": [
           "location",
           "fetch"
         ]
       }
+    },
+    "android": {
+      "package": "com.coronaprod.coronakiller",
+      "versionCode": 1
     },
     "splash": {
       "image": "./resources/images/splash-screen.png",
