@@ -1,5 +1,7 @@
 import * as Location from 'expo-location';
 import * as Permissions from 'expo-permissions';
+import { LocationData } from 'expo-location';
+import { getData } from './asyncStorage';
 
 export async function getLocationAsync() {
   const { status } = await Permissions.askAsync(Permissions.LOCATION);
@@ -50,4 +52,17 @@ export function getDistance(
     }
     return dist;
   }
+}
+
+export async function getDistanceFromHome() {
+  const { location } = await getLocationAsync();
+  const homeLocation: LocationData = await getData('homeLocation');
+
+  return getDistance(
+    location.coords.latitude,
+    location.coords.longitude,
+    homeLocation.coords.latitude,
+    homeLocation.coords.longitude,
+    'M'
+  );
 }
