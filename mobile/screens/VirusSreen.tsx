@@ -3,6 +3,8 @@ import { View, Text, Image, StyleSheet, Animated } from 'react-native';
 import { Virus } from '../models/Virus';
 import Bar from 'react-native-progress/Bar';
 
+import {storeData, getData} from '../shared/asyncStorage';
+import { getLocationAsync, distance } from '../shared/location';
 
 export class VirusScreen<P> extends React.Component<P> {
   VIRUS_HEALTH = 360;
@@ -28,11 +30,36 @@ export class VirusScreen<P> extends React.Component<P> {
     );
   }
 
-  reduceVirusHealth() {
+  reduceVirusHealth = async() => {
+    // let location = await getLocationAsync();
+    let mocklocation = {
+      "coords": {
+        "accuracy": 5,
+        "altitude": 0,
+        "altitudeAccuracy": -1,
+        "heading": -1,
+        "latitude": 40.7128, // New York
+        "longitude": -74.00600,
+        "speed": -1
+      },
+     "timestamp": 666
+    };
+    let homeLocationString = await getData("homeLocation");
+    let homeLocation = JSON.parse(homeLocationString);
+    console.log(distance(
+      mocklocation.coords.latitude,
+      mocklocation.coords.longitude,
+      homeLocation.coords.latitude,
+      homeLocation.coords.longitude,
+      "K") + " KM"
+    );
     this.virus.reduceHealth(1);
     this.setState({ virusHealth: this.virus.getHealth() });
 
     if (this.virus.getHealth() % 5 == 0) {
+
+      console.log(homeLocation);
+      console.log(mocklocation);
       this.animateVirus();
     }
   }
@@ -42,7 +69,8 @@ export class VirusScreen<P> extends React.Component<P> {
       this.previousVirusHealth / this.virus.getInitialHealth()
     );
 
-    Animated.spring(this.virusSpringValue, {
+    Animated.spring(this.virusSpringValue,
+       {
       toValue: this.virus.getHealthPercentage(),
       friction: 0.25
     }).start();

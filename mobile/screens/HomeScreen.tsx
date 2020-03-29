@@ -1,8 +1,8 @@
 import React from 'react';
 import { NavigationInjectedProps } from 'react-navigation';
 import { Button, View, Text, StyleSheet } from 'react-native';
-import {storeData, getData} from '../shared/asyncStorage.ts'
-import { getLocationAsync } from '../shared/location.ts'
+import {storeData, getData} from '../shared/asyncStorage';
+import { getLocationAsync } from '../shared/location';
 
 export class HomeScreen extends React.Component<
   NavigationInjectedProps
@@ -41,11 +41,11 @@ export class HomeScreen extends React.Component<
 
   setLocation = async () => {
     let location = await getLocationAsync();
-    if(!location.error){
+    if(!location.errorMessage){
       this.setState({ location: location});
     }
     else{
-      this.setState({ errorMessage: location.error});
+      this.setState({ errorMessage: location.errorMessage});
     }
   }
 

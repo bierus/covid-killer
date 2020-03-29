@@ -10,9 +10,7 @@ export const storeData = async (key, value) => {
 
 export const getData = async (key) => {
     try {
-        console.log("CALLED")
         const value = await AsyncStorage.getItem(key)
-        console.log(value);
         if (value !== null) {
             return value;
         }
