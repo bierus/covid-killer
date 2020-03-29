@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet, Animated } from 'react-native';
+import { View, Text, Image, StyleSheet, Animated, Button } from 'react-native';
 import { Virus } from '../models/Virus';
 import Bar from 'react-native-progress/Bar';
 
@@ -24,6 +24,12 @@ export class VirusScreen<P> extends React.Component<P> {
   constructor(props: P) {
     super(props);
     this.init()
+  }
+
+  restart = () => {
+    this.virus = new Virus(this.VIRUS_HEALTH, this.VIRUS_HEALTH);
+    storeData("Virus", this.virus);
+    this.init();
   }
 
   init = () => {
@@ -131,6 +137,11 @@ export class VirusScreen<P> extends React.Component<P> {
               style={styles.trophyImage}
             />
           )}
+          {/* TO BE REMOVED */}
+          <Button
+            title='Restart'
+            onPress={() => this.restart()}
+          />
         </View>
       </>
     );
