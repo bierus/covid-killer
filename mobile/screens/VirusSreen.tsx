@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet, Animated } from 'react-native';
 import { Virus } from '../models/Virus';
-import { Bar } from 'react-native-progress';
+import Bar from 'react-native-progress/Bar';
 
 
 export class VirusScreen<P> extends React.Component<P> {
