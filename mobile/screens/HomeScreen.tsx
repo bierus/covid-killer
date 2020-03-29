@@ -13,7 +13,6 @@ export class HomeScreen extends React.Component<
 
   componentDidMount(){
     this.init();
-    
   }
 
   state = {
@@ -33,7 +32,7 @@ export class HomeScreen extends React.Component<
 
   init = async () => {
     // if info === undefined, load homeView... This process should be done before component Init
-    let info = await getData("homeLocation");
+    const info = await getData('homeLocation');
     await this.setLocation()
     if(info){
         this.props.navigation.navigate('Virus')
@@ -51,7 +50,7 @@ export class HomeScreen extends React.Component<
   }
 
   navigateToVirus = () => {
-    storeData("homeLocation", this.state.location);
+    storeData('homeLocation', this.state.location);
     this.props.navigation.navigate('Virus')
   } 
 
@@ -74,11 +73,11 @@ export class HomeScreen extends React.Component<
               </Text>
               <Button
                 title='Save'
-                onPress={() => this.navigateToVirus()}
+                onPress={this.navigateToVirus}
               />
               <Button
                 title='Try again'
-                onPress={() => this.setLocation()}
+                onPress={this.setLocation}
               />
             </View>
           </>
