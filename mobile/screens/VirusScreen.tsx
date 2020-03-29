@@ -1,3 +1,4 @@
+import moment from 'moment';
 import React from 'react';
 import { View, Text, Image, StyleSheet, Animated } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -12,6 +13,12 @@ import { getLocationAsync, getDistance } from '../shared/location';
 export class VirusScreen<P> extends React.Component<P> {
   VIRUS_HEALTH = 360;
 
+  // interval for which we're checking the distance changes
+  VERIFY_DISTANCE_INTERVAL = 1000;
+
+  // value by which we're reducing the HP each time
+  REDUCE_HEALTH_BY = 1;
+
   virus = new Virus(this.VIRUS_HEALTH, this.VIRUS_HEALTH);
   previousVirusHealth = this.VIRUS_HEALTH;
 
@@ -19,7 +26,8 @@ export class VirusScreen<P> extends React.Component<P> {
 
   state = {
     distance: 999,
-    virusHealth: this.VIRUS_HEALTH
+    virusHealth: this.VIRUS_HEALTH,
+    timeLeft: this.VERIFY_DISTANCE_INTERVAL * this.VIRUS_HEALTH / this.REDUCE_HEALTH_BY
   };
 
   constructor(props: P) {
@@ -49,7 +57,7 @@ export class VirusScreen<P> extends React.Component<P> {
         } else {
           clearInterval(virusIntervalId);
         }
-      }, 1000);
+      }, this.VERIFY_DISTANCE_INTERVAL);
     });
   }
 
@@ -72,12 +80,37 @@ export class VirusScreen<P> extends React.Component<P> {
     if (currentDist > 10) {
       return;
     }
-    this.virus.reduceHealth(1);
+    this.virus.reduceHealth(this.REDUCE_HEALTH_BY);
     this.setState({ virusHealth: this.virus.getHealth() });
 
     if (this.virus.getHealth() % 5 == 0) {
       this.animateVirus();
     }
+    this.updateTimeLeft();
+  }
+
+  updateTimeLeft() {
+    const updatesLeft = this.virus.getHealth() / this.REDUCE_HEALTH_BY;
+    const millisecondsLeft = this.VERIFY_DISTANCE_INTERVAL * updatesLeft;
+    this.setState({ timeLeft: millisecondsLeft });
+  }
+
+  formatTimeLeft() {
+    const timeLeft = moment.duration(this.state.timeLeft);
+    let valuesToDisplay = [];
+    if (valuesToDisplay.length || timeLeft.months()) {
+      valuesToDisplay.push(`${timeLeft.months()} months`);
+    }
+    if (valuesToDisplay.length || timeLeft.hours()) {
+      valuesToDisplay.push(`${timeLeft.hours()} hours`);
+    }
+    if (valuesToDisplay.length || timeLeft.minutes()) {
+      valuesToDisplay.push(`${timeLeft.minutes()} minutes`);
+    }
+    if (valuesToDisplay.length || timeLeft.seconds()) {
+      valuesToDisplay.push(`${timeLeft.seconds()} seconds`);
+    }
+    return valuesToDisplay.join(' ');
   }
 
   animateVirus() {
@@ -127,6 +160,11 @@ export class VirusScreen<P> extends React.Component<P> {
               style={styles.trophyImage}
             />
           )}
+          {this.state.timeLeft > 0 ? (
+            <Text style={styles.timeLeft}>Your virus will die in {this.formatTimeLeft()}.{'\n'}#StayHome</Text>
+          ) :  (
+            <Text style={styles.timeLeft}>You killed the virus!{'\n'}#StayHome</Text>
+          )}
           <View style={{ margin: 15 }}>
             <Button title='Restart' onPress={this.restart} type='outline' />
           </View>
@@ -155,5 +193,8 @@ const styles = StyleSheet.create({
   trophyImage: {
     width: 200,
     height: 250
+  },
+  timeLeft: {
+    textAlign: 'center'
   }
 });
