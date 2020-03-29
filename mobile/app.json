@@ -20,6 +20,11 @@
           "fetch"
         ]
       }
+    },
+    "splash": {
+      "image": "./resources/images/splash-screen.png",
+      "backgroundColor": "#B1A2A8",
+      "resizeMode": "contain"
     }
   }
 }
