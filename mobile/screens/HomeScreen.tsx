@@ -1,8 +1,10 @@
 import React from 'react';
 import { NavigationInjectedProps } from 'react-navigation';
-import { Button, View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { storeData, getData } from '../shared/asyncStorage';
 import { getLocationAsync } from '../shared/location';
+import Icon from 'react-native-vector-icons/FontAwesome';
+import { Button } from 'react-native-elements';
 
 export class HomeScreen extends React.Component<NavigationInjectedProps> {
   constructor(props: NavigationInjectedProps) {
@@ -62,13 +64,26 @@ export class HomeScreen extends React.Component<NavigationInjectedProps> {
           <>
             <View style={styles.container}>
               <Text style={styles.gameTitle}>Covid Killer</Text>
-              <Text style={styles.prompt}>Is this your home location?</Text>
+              <Text style={styles.prompt}>
+                Is this your <Icon name='home' size={30} /> location?
+              </Text>
+
               <Text style={styles.promptCords}>
                 Latitude: {latitude}
                 {'\n'}Longitude: {longitude}
               </Text>
-              <Button title='Save' onPress={this.navigateToVirus} />
-              <Button title='Try again' onPress={this.setLocation} />
+              <View style={{ margin: 20 }}>
+                <Button
+                  title='Yes - save'
+                  onPress={this.navigateToVirus}
+                  type='outline'
+                />
+              </View>
+              <Button
+                title='No - reload'
+                onPress={this.setLocation}
+                type='outline'
+              />
             </View>
           </>
         )}
@@ -85,17 +100,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff'
   },
   gameTitle: {
-    color: '#555',
+    color: 'black',
     fontSize: 50,
     padding: 20
   },
   prompt: {
-    color: '#555',
+    color: 'black',
     fontSize: 15,
     padding: 8
   },
   promptCords: {
-    color: '#555',
+    color: 'black',
     fontSize: 15,
     paddingTop: 8,
     paddingBottom: 20

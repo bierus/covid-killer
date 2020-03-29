@@ -23,7 +23,7 @@
     },
     "splash": {
       "image": "./resources/images/splash-screen.png",
-      "backgroundColor": "#B1A2A8",
+      "backgroundColor": "#fff",
       "resizeMode": "contain"
     }
   }
