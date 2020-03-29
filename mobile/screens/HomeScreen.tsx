@@ -5,6 +5,8 @@ import * as Location from 'expo-location';
 import * as Permissions from 'expo-permissions';
 import { LocationData } from 'expo-location';
 
+import {storeData, getData} from '../shared/asyncStorage.ts'
+
 type State = {
   location: LocationData;
   errorMessage: string;
@@ -35,7 +37,6 @@ export class HomeScreen extends React.Component<
   };
 
   getLocationAsync = async () => {
-    console.log("GET LOCATION")
     let { status } = await Permissions.askAsync(Permissions.LOCATION);
     if (status !== 'granted') {
       this.setState({
@@ -43,9 +44,14 @@ export class HomeScreen extends React.Component<
       });
     }
     let currentLocation = await Location.getCurrentPositionAsync({});
-    console.log(currentLocation)
     this.setState({ location: currentLocation});
   };
+
+  navigateToVirus = () => {
+    storeData("homeLocation", JSON.stringify(this.state.location));
+    console.log("STORED")
+    this.props.navigation.navigate('Virus')
+  } 
 
   render() {
     const { latitude, longitude } = this.state.location.coords;
@@ -66,7 +72,7 @@ export class HomeScreen extends React.Component<
               </Text>
               <Button
                 title='Save'
-                onPress={() => this.props.navigation.navigate('Virus')}
+                onPress={() => this.navigateToVirus()}
               />
               <Button
                 title='Try again'
@@ -93,13 +99,11 @@ const styles = StyleSheet.create({
     padding: 20
   },
   prompt:{
-    
     color: '#555',
     fontSize: 15,
     padding: 8
   },
   promptCords:{
-    
     color: '#555',
     fontSize: 15,
     paddingTop: 8,
