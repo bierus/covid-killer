@@ -3,11 +3,16 @@ import { View, Text, Image, StyleSheet, Animated } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Virus } from '../models/Virus';
 import Bar from 'react-native-progress/Bar';
-import { LocationData } from 'expo-location';
 import { Button } from 'react-native-elements';
 
 import { storeData, getData } from '../shared/asyncStorage';
-import { getLocationAsync, getDistance } from '../shared/location';
+
+import * as BackgroundFetch from 'expo-background-fetch';
+import {
+  VIRUS_TASK,
+  MINUTE_INTERVAL as VIRUS_TASK_INTERVAL
+} from '../tasks/virusTask';
+import { getDistanceFromHome } from '../shared/location';
 
 export class VirusScreen<P> extends React.Component<P> {
   VIRUS_HEALTH = 360;
@@ -33,7 +38,11 @@ export class VirusScreen<P> extends React.Component<P> {
     this.init();
   };
 
-  init() {
+  async init() {
+    BackgroundFetch.registerTaskAsync(VIRUS_TASK, {
+      minimumInterval: VIRUS_TASK_INTERVAL
+    });
+
     getData('Virus').then(value => {
       if (value === undefined) {
         this.virus = new Virus(this.VIRUS_HEALTH, this.VIRUS_HEALTH);
@@ -41,43 +50,33 @@ export class VirusScreen<P> extends React.Component<P> {
       } else {
         this.virus = new Virus(value.initialHealth, value.health);
       }
-
-      const virusIntervalId = setInterval(() => {
-        if (this.virus.getHealth() > 0) {
-          this.reduceVirusHealth();
-          storeData('Virus', this.virus);
-        } else {
-          clearInterval(virusIntervalId);
-        }
-      }, 1000);
     });
+
+    const intervalId = setInterval(() => {
+      getData('Virus').then(value => {
+        this.virus = new Virus(value.initialHealth, value.health);
+
+        if (this.virus.getHealth() >= 0) {
+          this.virus.reduceHealth(1);
+          storeData('Virus', this.virus);
+          this.updateVirusStateData();
+
+          if (this.virus.getHealth() % 5 == 0) {
+            this.animateVirus();
+          }
+        } else {
+          BackgroundFetch.unregisterTaskAsync(VIRUS_TASK);
+          clearInterval(intervalId);
+        }
+      });
+    }, 1000);
   }
 
-  async calculateDistance() {
-    const { location } = await getLocationAsync();
-    const homeLocation: LocationData = await getData('homeLocation');
-
-    return getDistance(
-      location.coords.latitude,
-      location.coords.longitude,
-      homeLocation.coords.latitude,
-      homeLocation.coords.longitude,
-      'M'
-    );
-  }
-
-  async reduceVirusHealth() {
-    let currentDist = await this.calculateDistance();
-    this.setState({ distance: currentDist });
-    if (currentDist > 10) {
-      return;
-    }
-    this.virus.reduceHealth(1);
-    this.setState({ virusHealth: this.virus.getHealth() });
-
-    if (this.virus.getHealth() % 5 == 0) {
-      this.animateVirus();
-    }
+  async updateVirusStateData() {
+    this.setState({
+      distance: await getDistanceFromHome(),
+      virusHealth: this.virus.getHealth()
+    });
   }
 
   animateVirus() {
