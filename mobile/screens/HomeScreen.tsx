@@ -1,17 +1,15 @@
 import React from 'react';
 import { NavigationInjectedProps } from 'react-navigation';
 import { Button, View, Text, StyleSheet } from 'react-native';
-import {storeData, getData} from '../shared/asyncStorage';
+import { storeData, getData } from '../shared/asyncStorage';
 import { getLocationAsync } from '../shared/location';
 
-export class HomeScreen extends React.Component<
-  NavigationInjectedProps
-> {
+export class HomeScreen extends React.Component<NavigationInjectedProps> {
   constructor(props: NavigationInjectedProps) {
     super(props);
   }
 
-  componentDidMount(){
+  componentDidMount() {
     this.init();
   }
 
@@ -33,26 +31,25 @@ export class HomeScreen extends React.Component<
   init = async () => {
     // if info === undefined, load homeView... This process should be done before component Init
     const info = await getData('homeLocation');
-    await this.setLocation()
-    if(info){
-        this.props.navigation.navigate('Virus')
-    } 
-  }
+    await this.setLocation();
+    if (info) {
+      this.props.navigation.navigate('Virus');
+    }
+  };
 
   setLocation = async () => {
-    let location = await getLocationAsync();
-    if(!location.errorMessage){
-      this.setState({ location: location});
+    let { location, errorMessage } = await getLocationAsync();
+    if (location) {
+      this.setState({ location });
+    } else {
+      this.setState({ errorMessage });
     }
-    else{
-      this.setState({ errorMessage: location.errorMessage});
-    }
-  }
+  };
 
   navigateToVirus = () => {
     storeData('homeLocation', this.state.location);
-    this.props.navigation.navigate('Virus')
-  } 
+    this.props.navigation.navigate('Virus');
+  };
 
   render() {
     const { latitude, longitude } = this.state.location.coords;
@@ -64,21 +61,14 @@ export class HomeScreen extends React.Component<
         ) : (
           <>
             <View style={styles.container}>
-
               <Text style={styles.gameTitle}>Covid Killer</Text>
               <Text style={styles.prompt}>Is this your home location?</Text>
               <Text style={styles.promptCords}>
                 Latitude: {latitude}
                 {'\n'}Longitude: {longitude}
               </Text>
-              <Button
-                title='Save'
-                onPress={this.navigateToVirus}
-              />
-              <Button
-                title='Try again'
-                onPress={this.setLocation}
-              />
+              <Button title='Save' onPress={this.navigateToVirus} />
+              <Button title='Try again' onPress={this.setLocation} />
             </View>
           </>
         )}
@@ -94,21 +84,20 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: '#fff'
   },
-  gameTitle:{
+  gameTitle: {
     color: '#555',
     fontSize: 50,
     padding: 20
   },
-  prompt:{
+  prompt: {
     color: '#555',
     fontSize: 15,
     padding: 8
   },
-  promptCords:{
+  promptCords: {
     color: '#555',
     fontSize: 15,
     paddingTop: 8,
     paddingBottom: 20
-  },
-
+  }
 });

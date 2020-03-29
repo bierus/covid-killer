@@ -4,67 +4,58 @@ import { Virus } from '../models/Virus';
 import Bar from 'react-native-progress/Bar';
 
 import { storeData, getData } from '../shared/asyncStorage';
-import { getLocationAsync, distance } from '../shared/location';
-
-import * as TaskManager from 'expo-task-manager';
-const LOCATION_TASK_NAME = 'background-virus-task';
+import { getLocationAsync, getDistance } from '../shared/location';
+import { LocationData } from 'expo-location';
 
 export class VirusScreen<P> extends React.Component<P> {
   VIRUS_HEALTH = 360;
+
   virus = new Virus(this.VIRUS_HEALTH, this.VIRUS_HEALTH);
   previousVirusHealth = this.VIRUS_HEALTH;
+
   virusSpringValue = new Animated.Value(1);
-  virusIntervalId: number;
 
   state = {
-    dist: 999,
+    distance: 999,
     virusHealth: this.VIRUS_HEALTH
   };
 
   constructor(props: P) {
     super(props);
-    this.init()
+    this.init();
   }
 
   restart = () => {
     this.virus = new Virus(this.VIRUS_HEALTH, this.VIRUS_HEALTH);
     storeData('Virus', this.virus);
     this.init();
-  }
+  };
 
-  init = () => {
-    getData('Virus').then((value) => {
+  init() {
+    getData('Virus').then(value => {
       if (value === undefined) {
         this.virus = new Virus(this.VIRUS_HEALTH, this.VIRUS_HEALTH);
         storeData('Virus', this.virus);
-      }
-      else {
+      } else {
         this.virus = new Virus(value.initialHealth, value.health);
       }
 
-      this.virusIntervalId = setInterval(
-        () => {
-          if (this.virus.getHealth() > 0) {
-            this.reduceVirusHealth();
-            storeData('Virus', this.virus);
-          }
-          else {
-            clearInterval(this.virusIntervalId);
-          }
-        },
-        1000
-      );
+      const virusIntervalId = setInterval(() => {
+        if (this.virus.getHealth() > 0) {
+          this.reduceVirusHealth();
+          storeData('Virus', this.virus);
+        } else {
+          clearInterval(virusIntervalId);
+        }
+      }, 1000);
     });
   }
 
-  componentWillUnmount() {
-    clearInterval(this.virusIntervalId);
-  }
+  async calculateDistance() {
+    const { location } = await getLocationAsync();
+    const homeLocation: LocationData = await getData('homeLocation');
 
-  calculateDist = async () => {
-    let location = await getLocationAsync();
-    let homeLocation = await getData('homeLocation')
-    return distance(
+    return getDistance(
       location.coords.latitude,
       location.coords.longitude,
       homeLocation.coords.latitude,
@@ -73,9 +64,9 @@ export class VirusScreen<P> extends React.Component<P> {
     );
   }
 
-  reduceVirusHealth = async () => {
-    let currentDist = await this.calculateDist()
-    this.setState({ dist: currentDist })
+  async reduceVirusHealth() {
+    let currentDist = await this.calculateDistance();
+    this.setState({ dist: currentDist });
     if (currentDist > 10) {
       return;
     }
@@ -92,11 +83,10 @@ export class VirusScreen<P> extends React.Component<P> {
       this.previousVirusHealth / this.virus.getInitialHealth()
     );
 
-    Animated.spring(this.virusSpringValue,
-      {
-        toValue: this.virus.getHealthPercentage(),
-        friction: 0.25
-      }).start();
+    Animated.spring(this.virusSpringValue, {
+      toValue: this.virus.getHealthPercentage(),
+      friction: 0.25
+    }).start();
 
     this.previousVirusHealth = this.virus.getHealth();
   }
@@ -105,9 +95,7 @@ export class VirusScreen<P> extends React.Component<P> {
     return (
       <>
         <View style={styles.container}>
-          <Text style={styles.virusHpText}>
-            Dist: {this.state.dist} M
-          </Text>
+          <Text style={styles.virusHpText}>Dist: {this.state.distance} M</Text>
 
           {this.virus.getHealth() > 0 ? (
             <>
@@ -130,16 +118,12 @@ export class VirusScreen<P> extends React.Component<P> {
               />
             </>
           ) : (
-              <Image
-                source={require('../resources/images/trophy.png')}
-                style={styles.trophyImage}
-              />
-            )}
-          {/* TO BE REMOVED */}
-          <Button
-            title='Restart'
-            onPress={this.restart}
-          />
+            <Image
+              source={require('../resources/images/trophy.png')}
+              style={styles.trophyImage}
+            />
+          )}
+          <Button title='Restart' onPress={this.restart} />
         </View>
       </>
     );
