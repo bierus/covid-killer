@@ -12,6 +12,14 @@
       "ios",
       "android",
       "web"
-    ]
+    ],
+    "ios": {
+      "infoPlist": {
+        "UIBackgroundModes": [
+          "location",
+          "fetch"
+        ]
+      }
+    }
   }
 }

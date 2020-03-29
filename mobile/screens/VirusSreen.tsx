@@ -6,15 +6,15 @@ import Bar from 'react-native-progress/Bar';
 import {storeData, getData} from '../shared/asyncStorage';
 import { getLocationAsync, distance } from '../shared/location';
 
+import * as TaskManager from 'expo-task-manager';
+const LOCATION_TASK_NAME = 'background-virus-task';
+
 export class VirusScreen<P> extends React.Component<P> {
   VIRUS_HEALTH = 360;
-
   virus = new Virus(this.VIRUS_HEALTH);
   previousVirusHealth = this.VIRUS_HEALTH;
-
   virusSpringValue = new Animated.Value(1);
-
-  virusIntervalId;
+  virusIntervalId: number;
 
   state = {
     dist: 9999999,
@@ -23,14 +23,48 @@ export class VirusScreen<P> extends React.Component<P> {
 
   constructor(props: P) {
     super(props);
-
-    this.virusIntervalId = setInterval(
-      () =>
-        this.virus.getHealth() > 0
+    getData("Virus").then( (value) => {
+      console.log(value)
+      console.log("totototot")
+      this.virus = new Virus(value.initialHealth);//value;
+      this.virus.setHealth( value.health );
+      if(this.virus === undefined){
+        this.virus = new Virus(this.VIRUS_HEALTH);
+        storeData("Virus", this.virus);
+      } 
+  
+      console.log(this.virus);
+  
+      this.virusIntervalId = setInterval(
+        () => {
+          this.virus.getHealth() > 0
           ? this.reduceVirusHealth()
-          : clearInterval(this.virusIntervalId),
-      1000
-    );
+          : clearInterval(this.virusIntervalId)
+          storeData("Virus", this.virus);
+        },
+        1000
+      );
+    });
+  }
+
+  init = async () => {
+    this.virus = getData("Virus").then( (res, rej) => {
+      if(this.virus === undefined){
+        this.virus = new Virus(this.VIRUS_HEALTH);
+        storeData("Virus", undefined);
+      } 
+  
+      console.log(this.virus);
+  
+      this.virusIntervalId = setInterval(
+        () => {
+          this.virus.getHealth() > 0
+          ? this.reduceVirusHealth()
+          : clearInterval(this.virusIntervalId)
+        },
+        1000
+      );
+    });
   }
 
   componentWillUnmount() {
@@ -40,7 +74,7 @@ export class VirusScreen<P> extends React.Component<P> {
   calculateDist = async () => {
     let location = await getLocationAsync(); 
     let homeLocationString = await getData("homeLocation");
-    let homeLocation = JSON.parse(homeLocationString);
+    let homeLocation = homeLocationString;
     return distance(
       location.coords.latitude,
       location.coords.longitude,
@@ -52,9 +86,12 @@ export class VirusScreen<P> extends React.Component<P> {
 
   reduceVirusHealth = async () => {
     let currentDist = await this.calculateDist()
-
+    this.setState({dist: currentDist })
+    if(currentDist > 10){
+      return;
+    }
     this.virus.reduceHealth(1);
-    this.setState({ dist: currentDist ,virusHealth: this.virus.getHealth() });
+    this.setState({ virusHealth: this.virus.getHealth() });
 
     if (this.virus.getHealth() % 5 == 0) {
       this.animateVirus();

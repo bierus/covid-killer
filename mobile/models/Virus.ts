@@ -7,7 +7,7 @@ export class Virus {
 
   getHealth = () => this.health;
   getInitialHealth = () => this.initialHealth;
-
+  setHealth = (value: number) => this.health = value;
   getHealthPercentage() {
     return Math.round((this.health / this.initialHealth) * 100) / 100;
   }

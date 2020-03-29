@@ -13,6 +13,7 @@ export class HomeScreen extends React.Component<
 
   componentDidMount(){
     this.init();
+    
   }
 
   state = {
@@ -50,7 +51,7 @@ export class HomeScreen extends React.Component<
   }
 
   navigateToVirus = () => {
-    storeData("homeLocation", JSON.stringify(this.state.location));
+    storeData("homeLocation", this.state.location);
     this.props.navigation.navigate('Virus')
   } 
 
