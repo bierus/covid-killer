@@ -1,11 +1,5 @@
 export class Virus {
-  initialHealth: number;
-  health: number;
-
-  constructor(initialHealth: number, health: number) {
-    this.initialHealth = initialHealth; 
-    this.health = health;
-  }
+  constructor(private initialHealth: number, private health: number) {}
 
   getHealth = () => this.health;
   getInitialHealth = () => this.initialHealth;
