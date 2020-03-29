@@ -100,8 +100,8 @@ export class VirusScreen<P> extends React.Component<P> {
                   height: this.VIRUS_HEALTH,
                   width: this.VIRUS_HEALTH,
                   transform: [{ scale: this.virusSpringValue }]
-                }}
-                source={require('../resources/images/corona.webp')}
+                }}                
+                source={require('../resources/images/corona.png')}
               />
             </>
           ) : (
