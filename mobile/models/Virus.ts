@@ -10,4 +10,8 @@ export class Virus {
   reduceHealth(reduceAmount: number) {
     this.health -= reduceAmount;
   }
+
+  regenerateHealth(reduceAmount: number) {
+    this.health += reduceAmount;
+  }
 }

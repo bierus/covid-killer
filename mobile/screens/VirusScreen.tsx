@@ -61,13 +61,19 @@ export class VirusScreen<P> extends React.Component<P> {
     });
 
     const intervalId = setInterval(() => {
-      getData('Virus').then(value => {
-        this.virus = new Virus(value.initialHealth, value.health);
-
+      getData('Virus').then(async value => {
         if (this.virus.getHealth() >= 0) {
-          this.virus.reduceHealth(this.REDUCE_HEALTH_BY);
+          let homeDistance: number = await getDistanceFromHome();
+
+          if (homeDistance < 50) {
+            this.virus.reduceHealth(this.REDUCE_HEALTH_BY);
+          }
+          else{
+            this.virus.regenerateHealth(this.REDUCE_HEALTH_BY);
+          }
+
           storeData('Virus', this.virus);
-          this.updateVirusStateData();
+          this.updateVirusStateData(homeDistance);
 
           if (this.virus.getHealth() % 5 == 0) {
             this.animateVirus();
@@ -106,9 +112,9 @@ export class VirusScreen<P> extends React.Component<P> {
     return valuesToDisplay.join(' ');
   }
 
-  async updateVirusStateData() {
+  async updateVirusStateData(homeDistance: number) {
     this.setState({
-      distance: await getDistanceFromHome(),
+      distance: homeDistance,
       virusHealth: this.virus.getHealth()
     });
   }

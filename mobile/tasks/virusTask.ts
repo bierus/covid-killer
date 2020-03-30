@@ -13,13 +13,17 @@ async function updateVirusWithLocation() {
   try {
     const homeDistance = await getDistanceFromHome();
 
-    if (homeDistance < 50) {
-      const { initialHealth, health } = await getData('Virus');
-      const virus = new Virus(initialHealth, health);
+    const { initialHealth, health } = await getData('Virus');
+    const virus = new Virus(initialHealth, health);
 
+    if (homeDistance < 50) {
       virus.reduceHealth(MINUTE_INTERVAL * 60);
-      storeData('Virus', virus);
     }
+    else{
+      virus.regenerateHealth(MINUTE_INTERVAL * 60);
+    }
+
+    storeData('Virus', virus);
 
     return BackgroundFetch.Result.NewData;
   } catch (error) {
