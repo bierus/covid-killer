@@ -56,18 +56,27 @@ export class VirusScreen<P> extends React.Component<P> {
     this.init();
   }
 
-  restart = () => {
+  restart = async () => {
     this.virus = new Virus(this.VIRUS_HEALTH, this.VIRUS_HEALTH);
     storeData('Virus', this.virus);
-    BackgroundFetch.unregisterTaskAsync(VIRUS_TASK);
-    clearInterval(this.intervalId);
+    try {
+      await BackgroundFetch.unregisterTaskAsync(VIRUS_TASK);
+      clearInterval(this.intervalId);
+    } catch (error) {
+      console.log(error)
+    }
     this.init();
   };
 
   async init() {
-    BackgroundFetch.registerTaskAsync(VIRUS_TASK, {
-      minimumInterval: VIRUS_TASK_INTERVAL
-    });
+    try {
+      await BackgroundFetch.registerTaskAsync(VIRUS_TASK, {
+        minimumInterval: VIRUS_TASK_INTERVAL
+      });
+    } catch (error) {
+      console.log(error)
+    }
+    
 
     getData('Virus').then(value => {
       if (value === undefined) {
@@ -99,8 +108,12 @@ export class VirusScreen<P> extends React.Component<P> {
 
           this.updateTimeLeft();
         } else {
-          BackgroundFetch.unregisterTaskAsync(VIRUS_TASK);
-          clearInterval(this.intervalId);
+          try {
+            await BackgroundFetch.unregisterTaskAsync(VIRUS_TASK);
+            clearInterval(this.intervalId);
+          } catch (error) {
+            console.log(error)
+          }
         }
       });
     }, this.VERIFY_DISTANCE_INTERVAL);
