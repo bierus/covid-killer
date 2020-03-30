@@ -1,10 +1,11 @@
 import React from 'react';
 import { NavigationInjectedProps } from 'react-navigation';
-import { View, Text, StyleSheet } from 'react-native';
-import { storeData, getData } from '../shared/asyncStorage';
-import { getLocationAsync } from '../shared/location';
+import { View, Text } from 'react-native';
+import { storeData, getData } from '../../shared/asyncStorage';
+import { getLocationAsync } from '../../shared/location';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Button } from 'react-native-elements';
+import { styles } from './HomeScreen.style'
 
 export class HomeScreen extends React.Component<NavigationInjectedProps> {
   constructor(props: NavigationInjectedProps) {
@@ -91,28 +92,4 @@ export class HomeScreen extends React.Component<NavigationInjectedProps> {
     );
   }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#fff'
-  },
-  gameTitle: {
-    color: 'black',
-    fontSize: 50,
-    padding: 20
-  },
-  prompt: {
-    color: 'black',
-    fontSize: 15,
-    padding: 8
-  },
-  promptCords: {
-    color: 'black',
-    fontSize: 15,
-    paddingTop: 8,
-    paddingBottom: 20
-  }
-});
+ 
