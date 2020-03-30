@@ -104,6 +104,9 @@ export class VirusScreen<P> extends React.Component<P> {
   }
 
   loopFunction = async () => {
+    const { initialHealth, health } = await getData('Virus');
+    this.virus = new Virus(initialHealth, health);
+
     if (this.virus.getHealth() >= 0) {
       let homeDistance: number = await getDistanceFromHome();
 
