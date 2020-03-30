@@ -47,7 +47,7 @@ export class VirusScreen<P> extends React.Component<P> {
         if(data[0] === undefined){
           throw "Api did not return any address."
         }
-        const specificCountry = await covid.getCountry({country: data[0].country});
+        const specificCountry = await covid.getCountry({country: data[0]['isoCountryCode']});
         this.setState({country: data[0].country });
         this.loadVirus(specificCountry.active);
         this.init();
@@ -147,9 +147,8 @@ export class VirusScreen<P> extends React.Component<P> {
           {this.virus.getHealth() > 0 ? (
             <>
               <Text style={styles.virusHpText}>
-                <Icon name='home' size={20} /> 
-                {Math.round(this.state.distance)}{' '}
-                m
+                <Icon name='home' size={20} />{' '}
+                {Math.round(this.state.distance)}{' '}m
               </Text>
               <Text style={styles.virusHpText}>
                 <Icon name='heart' size={20} /> {this.virus.getHealth()} / {this.virus.getInitialHealth()}
@@ -177,16 +176,12 @@ export class VirusScreen<P> extends React.Component<P> {
               style={styles.trophyImage}
             />
           )}
-          {this.virus.timeLeft > 0 ? (
-            <Text style={styles.timeLeft}>Your virus will die in {this.virus.formatTimeLeft()}.{'\n'}#StayHome</Text>
+          {this.virus.timeLeft > 0 ? (<>
+          <Text>You are fighting against virus from {this.state.country}!{'\n'}</Text>
+            <Text style={styles.timeLeft}>Your virus will die in {this.virus.formatTimeLeft()}.{'\n'}#StayHome</Text></>
           ) :  (
             <Text style={styles.timeLeft}>You killed the virus!{'\n'}#StayHome</Text>
           )}
-          <View style={{ margin: 15 }}>
-            <Button title='Restart' onPress={this.restart} type='outline' />
-            <Text>{JSON.stringify(this.state.country)}</Text>
-          </View>
-
         </View>
       </>
     );
