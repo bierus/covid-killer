@@ -31,7 +31,7 @@ export class VirusScreen<P> extends React.Component<P> {
   previousVirusHealth = this.VIRUS_HEALTH;
 
   virusSpringValue = new Animated.Value(1);
-  intervalId = "";
+  intervalId: number;
 
   state = {
     distance: 999,
