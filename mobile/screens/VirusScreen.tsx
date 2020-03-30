@@ -13,7 +13,10 @@ import {
   VIRUS_TASK,
   MINUTE_INTERVAL as VIRUS_TASK_INTERVAL
 } from '../tasks/virusTask';
-import { getDistanceFromHome } from '../shared/location';
+
+import { getDistanceFromHome, getLocationAsync } from '../shared/location';
+import * as Location from 'expo-location';
+import covid from 'novelcovid';
 
 export class VirusScreen<P> extends React.Component<P> {
   VIRUS_HEALTH = 360;
@@ -32,11 +35,23 @@ export class VirusScreen<P> extends React.Component<P> {
   state = {
     distance: 999,
     virusHealth: this.VIRUS_HEALTH,
-    timeLeft: this.VERIFY_DISTANCE_INTERVAL * this.VIRUS_HEALTH / this.REDUCE_HEALTH_BY
+    timeLeft: this.VERIFY_DISTANCE_INTERVAL * this.VIRUS_HEALTH / this.REDUCE_HEALTH_BY,
+    country: [],
   };
 
   constructor(props: P) {
     super(props);
+    getLocationAsync().then(async value => {
+      try {
+        const data = await Location.reverseGeocodeAsync(value.location.coords);
+        const specificCountry = await covid.getCountry({country: data[0].country});
+        this.VIRUS_HEALTH = Math.floor( specificCountry.active );
+        this.setState({country: data[0].country, virusHealth: this.VIRUS_HEALTH});
+        this.restart();
+      } catch (error) {
+        console.log(error)
+      }
+    })
     this.init();
   }
 
@@ -100,6 +115,9 @@ export class VirusScreen<P> extends React.Component<P> {
     if (valuesToDisplay.length || timeLeft.months()) {
       valuesToDisplay.push(`${timeLeft.months()} months`);
     }
+    if (valuesToDisplay.length || timeLeft.days()) {
+      valuesToDisplay.push(`${timeLeft.days()} days`);
+    }
     if (valuesToDisplay.length || timeLeft.hours()) {
       valuesToDisplay.push(`${timeLeft.hours()} hours`);
     }
@@ -139,11 +157,12 @@ export class VirusScreen<P> extends React.Component<P> {
           {this.virus.getHealth() > 0 ? (
             <>
               <Text style={styles.virusHpText}>
-                <Icon name='home' size={20} /> {Math.round(this.state.distance)}{' '}
+                <Icon name='home' size={20} /> 
+                {Math.round(this.state.distance)}{' '}
                 m
               </Text>
               <Text style={styles.virusHpText}>
-                <Icon name='heart' size={20} /> {this.state.virusHealth}
+                <Icon name='heart' size={20} /> {this.state.virusHealth} / {this.state.virusHealth}
               </Text>
               <Bar
                 progress={this.virus.getHealthPercentage()}
@@ -155,6 +174,8 @@ export class VirusScreen<P> extends React.Component<P> {
                 style={{
                   height: this.VIRUS_HEALTH,
                   width: this.VIRUS_HEALTH,
+                  maxHeight: 350,
+                  maxWidth: 350,
                   transform: [{ scale: this.virusSpringValue }]
                 }}
                 source={require('../resources/images/coronavirus.png')}
@@ -173,7 +194,9 @@ export class VirusScreen<P> extends React.Component<P> {
           )}
           <View style={{ margin: 15 }}>
             <Button title='Restart' onPress={this.restart} type='outline' />
+            <Text>{JSON.stringify(this.state.country)}</Text>
           </View>
+
         </View>
       </>
     );

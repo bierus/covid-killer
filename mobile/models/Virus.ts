@@ -12,6 +12,8 @@ export class Virus {
   }
 
   regenerateHealth(reduceAmount: number) {
-    this.health += reduceAmount;
+    if(this.health < this.initialHealth) { 
+      this.health += reduceAmount; 
+    }
   }
 }
