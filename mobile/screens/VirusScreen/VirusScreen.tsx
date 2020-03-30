@@ -20,7 +20,7 @@ import {
   VERIFY_DISTANCE_INTERVAL,
   REDUCE_HEALTH_BY,
   INCREASE_HEALTH_BY,
-} from 'react-native-dotenv'
+} from '../../env'
 
 
 export class VirusScreen<P> extends React.Component<P> {

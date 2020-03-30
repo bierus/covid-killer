@@ -1,7 +1,7 @@
 import {
   VERIFY_DISTANCE_INTERVAL,
   REDUCE_HEALTH_BY,
-} from 'react-native-dotenv'
+} from '../env'
 import moment from 'moment';
 
 export class Virus {
