@@ -31,6 +31,7 @@ export class VirusScreen<P> extends React.Component<P> {
   previousVirusHealth = this.VIRUS_HEALTH;
 
   virusSpringValue = new Animated.Value(1);
+  intervalId = "";
 
   state = {
     distance: 999,
@@ -58,6 +59,8 @@ export class VirusScreen<P> extends React.Component<P> {
   restart = () => {
     this.virus = new Virus(this.VIRUS_HEALTH, this.VIRUS_HEALTH);
     storeData('Virus', this.virus);
+    BackgroundFetch.unregisterTaskAsync(VIRUS_TASK);
+    clearInterval(this.intervalId);
     this.init();
   };
 
@@ -75,7 +78,7 @@ export class VirusScreen<P> extends React.Component<P> {
       }
     });
 
-    const intervalId = setInterval(() => {
+    this.intervalId = setInterval(() => {
       getData('Virus').then(async value => {
         if (this.virus.getHealth() >= 0) {
           let homeDistance: number = await getDistanceFromHome();
@@ -97,7 +100,7 @@ export class VirusScreen<P> extends React.Component<P> {
           this.updateTimeLeft();
         } else {
           BackgroundFetch.unregisterTaskAsync(VIRUS_TASK);
-          clearInterval(intervalId);
+          clearInterval(this.intervalId);
         }
       });
     }, this.VERIFY_DISTANCE_INTERVAL);
@@ -162,7 +165,7 @@ export class VirusScreen<P> extends React.Component<P> {
                 m
               </Text>
               <Text style={styles.virusHpText}>
-                <Icon name='heart' size={20} /> {this.state.virusHealth} / {this.state.virusHealth}
+                <Icon name='heart' size={20} /> {this.state.virusHealth} / {this.VIRUS_HEALTH}
               </Text>
               <Bar
                 progress={this.virus.getHealthPercentage()}
