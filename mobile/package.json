@@ -14,7 +14,7 @@
     "expo-background-fetch": "^8.1.0",
     "expo-location": "^8.1.0",
     "expo-task-manager": "^8.1.0",
-    "moment": "^2.24.0",
+    "moment": "^2.29.2",
     "novelcovid": "^1.0.9",
     "react": "~16.9.0",
     "react-dom": "~16.9.0",
